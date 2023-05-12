@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export const userSlice = createSlice({
   name: "user",
@@ -30,9 +31,9 @@ export const { setUser, resetUser } = userSlice.actions;
 export function loginUser(data) {
   return async (dispatch) => {
     console.log("slice", data);
-    let response = await axios.post("http://localhost:8001/auth/login", data);
+    let response = await axios.post("http://localhost:8000/auth/login", data);
     if (response.data.success) {
-      alert("succed");
+      toast.success(response.data.message);
       dispatch(setUser(response.data.data));
       localStorage.setItem("user_token", response.data.token);
       console.log(response.data);
@@ -46,7 +47,7 @@ export function checkLogin(token) {
   return async (dispatch) => {
     console.log(token);
     const response = await axios.post(
-      "http://localhost:8001/auth/check-login",
+      "http://localhost:8000/auth/check-login",
       {},
       {
         headers: {
@@ -62,6 +63,6 @@ export function logoutUser() {
   return async (dispatch) => {
     dispatch(resetUser());
     localStorage.removeItem("user_token");
-    alert("im logout");
+    toast.error("im logout");
   };
 }

@@ -32,7 +32,7 @@ function Verification() {
     setTimeout(() => {
       navigate("/");
     }, 4000);
-  }, [navigate]);
+  }, []);
   return (
     <div>
       <ToastContainer autoClose={3000} />
