@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 
 function Profile() {
   const [user, setUser] = useState();
+  const [previewUrl, setPreviewUrl] = useState("");
   const [formData, setFormData] = useState({
     fullname: "",
     username: "",
@@ -34,13 +35,16 @@ function Profile() {
     }
   };
 
-  // const handleFileChange = (event) => {
-  //   const file = event.target.files[0];
-  //   setFormData({
-  //     ...formData,
-  //     file,
-  //   });
-  // };
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFormData({
+        ...formData,
+        image: file,
+      });
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -110,11 +114,8 @@ function Profile() {
             <div className="card w-96 bg-base-100 shadow-xl">
               <figure>
                 <img
-                  src={
-                    formData?.image?.preview ||
-                    `http://localhost:8000${formData?.image}`
-                  }
-                  alt="Profile Picture"
+                  src={previewUrl || `http://localhost:8000${formData?.image}`}
+                  // alt="Profile"
                   className="w-1/2 h-1/2 object-cover"
                 />
               </figure>
@@ -125,15 +126,7 @@ function Profile() {
                     type="file"
                     name="image"
                     className="file-input file-input-bordered file-input-primary w-full max-w-xs"
-                    onChange={(event) => {
-                      setFormData({
-                        ...formData,
-                        image: {
-                          preview: URL.createObjectURL(event.target.files[0]),
-                          file: event.target.files[0],
-                        },
-                      });
-                    }}
+                    onChange={handleFileChange}
                   />
                 </div>
               </div>
