@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { loginUser } from "../features/users/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Login() {
   const navigate = useNavigate();
@@ -24,7 +25,8 @@ function Login() {
       // Navigate to the home page after a successful login
       navigate("/");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      toast.error("invalid password or email");
     }
   };
   return (

@@ -9,6 +9,8 @@ export const userSlice = createSlice({
       id: "",
       email: "",
       username: "",
+      fullname: "",
+      bio: "",
     },
   },
   reducers: {
@@ -20,6 +22,8 @@ export const userSlice = createSlice({
         id: "",
         email: "",
         username: "",
+        fullname: "",
+        bio: "",
       };
     },
   },
@@ -35,8 +39,10 @@ export function loginUser(data) {
     if (response.data.success) {
       toast.success(response.data.message);
       dispatch(setUser(response.data.data));
-      localStorage.setItem("user_token", response.data.token);
-      console.log(response.data);
+      // localStorage.setItem("userLogin", JSON.stringify(response.data.data)); // store user data in local storage
+      localStorage.setItem("user_token", response.data.token); // store the token in local storage
+
+      console.log(response.data.data);
     } else {
       alert(response.data.message);
     }
@@ -63,6 +69,27 @@ export function logoutUser() {
   return async (dispatch) => {
     dispatch(resetUser());
     localStorage.removeItem("user_token");
+    // localStorage.removeItem("userLogin");
     toast.error("im logout");
   };
 }
+
+// export function fetchUserById() {
+//   return async (dispatch) => {
+//     try {
+//       const token = localStorage.getItem("user_token");
+//       const response = await axios.get(`http://localhost:8000/auth/get-user`, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       });
+//       dispatch(setUser(response.data)); // dispatch setProduct action with fetched product
+
+//       // dispatch(setUser(response.data)); // dispatch setUser action with fetched user
+//       console.log(response);
+//     } catch (error) {
+//       console.error(error);
+//       alert("An error occurred. Please try again later.");
+//     }
+// };
+// }
