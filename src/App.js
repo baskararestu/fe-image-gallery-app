@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import Profile from "./pages/Profile";
 import MyPost from "./pages/MyPost";
+import ContentDetails from "./pages/ContentDetails";
 
 function App() {
   const userToken = localStorage.getItem("user_token");
@@ -52,6 +53,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-post" element={<MyPost />} />
+            <Route path="/content-details/:id" element={<ContentDetails />} />
           </>
         )}
       </Routes>

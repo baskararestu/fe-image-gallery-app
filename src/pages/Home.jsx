@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Home() {
   const [data, setData] = useState([]);
@@ -24,6 +25,7 @@ function Home() {
 
   const handleAddComment = async (contentId) => {
     setIsLoading(true);
+
     try {
       const response = await axios.post(
         `http://localhost:8000/content/contents/${contentId}/comments`,
@@ -47,6 +49,7 @@ function Home() {
       });
       setData(updatedData);
       setComment("");
+      console.log("Content fetched for page", page);
     } catch (error) {
       console.error(error);
     } finally {
@@ -55,6 +58,7 @@ function Home() {
     }
   };
 
+  console.log(data, "data");
   useEffect(() => {
     if (lastContentRef) {
       const observer = new IntersectionObserver(handleIntersection, {
@@ -69,7 +73,7 @@ function Home() {
     const fetchData = async (page) => {
       try {
         const contentsResponse = await axios.get(
-          `http://localhost:8000/content/all-content?page=${page}&limit=6`
+          `http://localhost:8000/content/all-content?page=${page}&limit=4`
         );
         const contentsData = contentsResponse.data;
         const combinedData = await Promise.all(
@@ -111,11 +115,17 @@ function Home() {
             ref={data.length === index + 1 ? setLastContentRef : null}
             className=" bg-white shadow-lg rounded-lg overflow-hidden"
           >
-            <img
-              className="w-full h-56 object-cover"
-              src={`http://localhost:8000${content.image}`}
-              alt=""
-            />
+            <Link
+              key={content.id_content}
+              to={`/content-details/${content.id_content}`}
+            >
+              <img
+                className="w-full h-56 object-cover"
+                src={`http://localhost:8000${content.image}`}
+                alt=""
+              />
+            </Link>
+
             <div className="p-4">
               <button className="btn bg-primary-focus text-slate-50 gap-2">
                 Likes
@@ -170,7 +180,7 @@ function Home() {
                   onClick={() => {
                     handleAddComment(content.id_content); // pass contentId to handleAddComment function
                   }}
-                  disabled={isLoading} // disable button when loading
+                  disabled={isLoading || !comment} // disable button when loading or when commentText is empty
                 >
                   {isLoading ? "Commenting..." : "Comment"}
                 </button>
