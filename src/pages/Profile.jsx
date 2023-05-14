@@ -132,7 +132,7 @@ function Profile() {
   console.log(formData);
 
   return (
-    <div className="h-screen w-screen flex justify-center overflow-hidden">
+    <div className="pt-16 h-screen w-screen flex justify-center overflow-hidden">
       <div className="border h-3/4 w-3/4 rounded-md bg-base-100 border-base-300 my-10 p-5">
         <div className="mb-5">
           <h1 className="text-secondary-content font-bold">Profile Details</h1>

@@ -23,10 +23,6 @@ function Navbar() {
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
   const handleLogout = () => {
     // Perform logout action, such as clearing the user session
     console.log("Logged out");
@@ -34,8 +30,12 @@ function Navbar() {
     navigate("/login");
   };
 
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   return (
-    <div className="flex flex-row gap-5  navbar bg-primary">
+    <div className="fixed top-0 flex flex-row gap-5  navbar bg-primary">
       <div className="flex-1">
         <a
           className="btn btn-ghost normal-case text-xl"

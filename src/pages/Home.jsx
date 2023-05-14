@@ -6,6 +6,16 @@ function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [comment, setComment] = useState("");
   const token = localStorage.getItem("user_token");
+  const [page, setPage] = useState(1);
+
+  const [lastContentRef, setLastContentRef] = useState(null);
+
+  const handleIntersection = (entries) => {
+    const entry = entries[0];
+    if (entry.isIntersecting && data.length % 6 === 0) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
 
   const handleCommentChange = (event) => {
     setComment(event.target.value);
@@ -41,16 +51,27 @@ function Home() {
       console.error(error);
     } finally {
       setIsLoading(false);
+      window.location.reload();
     }
   };
+
   useEffect(() => {
-    const fetchData = async () => {
+    if (lastContentRef) {
+      const observer = new IntersectionObserver(handleIntersection, {
+        rootMargin: "0px 0px 100% 0px",
+      });
+      observer.observe(lastContentRef);
+      return () => observer.disconnect();
+    }
+  }, [lastContentRef]);
+
+  useEffect(() => {
+    const fetchData = async (page) => {
       try {
         const contentsResponse = await axios.get(
-          "http://localhost:8000/content/all-content"
+          `http://localhost:8000/content/all-content?page=${page}&limit=6`
         );
         const contentsData = contentsResponse.data;
-        console.log(contentsData, "contents data");
         const combinedData = await Promise.all(
           contentsData.map(async (content) => {
             const [commentsResponse, likesResponse] = await Promise.all([
@@ -72,22 +93,23 @@ function Home() {
           })
         );
 
-        setData(combinedData);
+        setData((prevData) => [...prevData, ...combinedData]);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchData(page);
+  }, [page]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {data.map((content) => (
+    <div className="pt-24 min-h-screen bg-gray-100 p-4">
+      <div className={`grid grid-cols-${data.length} gap-4 justify-center`}>
+        {data.map((content, index) => (
           <div
             key={content.id_content}
-            className="bg-white shadow-lg rounded-lg overflow-hidden"
+            ref={data.length === index + 1 ? setLastContentRef : null}
+            className=" bg-white shadow-lg rounded-lg overflow-hidden"
           >
             <img
               className="w-full h-56 object-cover"
@@ -157,6 +179,7 @@ function Home() {
           </div>
         ))}
       </div>
+      <div ref={setLastContentRef}></div>
     </div>
   );
 }

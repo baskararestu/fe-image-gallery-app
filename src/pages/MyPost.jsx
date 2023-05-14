@@ -4,7 +4,7 @@ function MyPost() {
   const [post, setPost] = useState({});
 
   return (
-    <div className="flex flex-row justify-center min-h-screen">
+    <div className="pt-24 flex flex-row justify-center min-h-screen">
       <div className="card card-bordered border-primary-focus">
         <form>
           <div className="card-body items-center gap-3">
