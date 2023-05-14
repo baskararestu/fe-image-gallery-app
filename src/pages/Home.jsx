@@ -3,7 +3,46 @@ import axios from "axios";
 
 function Home() {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [comment, setComment] = useState("");
+  const token = localStorage.getItem("user_token");
 
+  const handleCommentChange = (event) => {
+    setComment(event.target.value);
+    console.log(comment);
+  };
+
+  const handleAddComment = async (contentId) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/content/contents/${contentId}/comments`,
+        {
+          comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const updatedData = data.map((content) => {
+        if (content.id_content === contentId) {
+          return {
+            ...content,
+            comments: [...content.comments, response.data],
+          };
+        }
+        return content;
+      });
+      setData(updatedData);
+      setComment("");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -56,7 +95,7 @@ function Home() {
               alt=""
             />
             <div className="p-4">
-              <button className="btn gap-2">
+              <button className="btn bg-primary-focus text-slate-50 gap-2">
                 Likes
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -95,6 +134,25 @@ function Home() {
                   </li>
                 ))}
               </ul>
+
+              <form className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add a comment"
+                  className="border-gray-300 rounded-md flex-1 p-2"
+                  onChange={handleCommentChange}
+                />
+                <button
+                  type="submit"
+                  className="btn bg-primary-focus text-slate-50 hover:bg-primary-hover"
+                  onClick={() => {
+                    handleAddComment(content.id_content); // pass contentId to handleAddComment function
+                  }}
+                  disabled={isLoading} // disable button when loading
+                >
+                  {isLoading ? "Commenting..." : "Comment"}
+                </button>
+              </form>
             </div>
           </div>
         ))}
