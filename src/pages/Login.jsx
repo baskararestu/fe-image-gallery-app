@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { loginUser } from "../features/users/userSlice";
@@ -17,16 +17,20 @@ function Login() {
       .min(6, "Password too short"),
   });
 
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
   const handleLoginUser = async (value) => {
     try {
+      setIsLoading(true);
       await dispatch(loginUser(value));
       // Navigate to the home page after a successful login
       navigate("/");
     } catch (error) {
-      // console.log(error);
-      toast.error("invalid password or email");
+      console.log(error);
+      toast.error(error.response.data.message);
+    } finally {
+      setIsLoading(false); // set isLoading to false after receiving the response
     }
   };
   return (
@@ -146,9 +150,13 @@ function Login() {
                   transition
                   duration-150
                   ease-in
+                   disabled:btn-disabled
                 "
+                        disabled={isLoading}
                       >
-                        <span className="mr-2 uppercase">Sign In</span>
+                        <span className="mr-2 uppercase">
+                          {isLoading ? "Signing In..." : "Sign In"}
+                        </span>
                       </button>
                     </div>
                   </Form>

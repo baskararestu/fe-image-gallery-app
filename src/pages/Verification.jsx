@@ -20,6 +20,7 @@ function Verification() {
             },
           }
         );
+        console.log(token);
         if (response.data.success) {
           toast.success(response.data.message);
         }
@@ -30,12 +31,11 @@ function Verification() {
   useEffect(() => {
     tokenVerification();
     setTimeout(() => {
-      navigate("/");
-    }, 4000);
+      navigate("/login");
+    }, 8000);
   }, []);
   return (
     <div>
-      <ToastContainer autoClose={3000} />
       <p>Your account is being verified</p>
       <p>{token}</p>
     </div>

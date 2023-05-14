@@ -20,7 +20,8 @@ function App() {
     if (
       !userToken &&
       location.pathname !== "/login" &&
-      location.pathname !== "/register"
+      location.pathname !== "/register" &&
+      !location.pathname.startsWith("/verification/")
     ) {
       window.location.replace("/login");
     }
@@ -37,9 +38,10 @@ function App() {
 
   return (
     <div data-theme="cupcake">
-      <ToastContainer autoClose={1000} />
+      <ToastContainer autoClose={2000} />
       <Navbar />
       <Routes>
+        <Route path="/verification/:token" element={<Verification />} />
         {!userToken ? (
           <>
             <Route path="/login" element={<Login />} />
@@ -52,7 +54,6 @@ function App() {
             <Route path="/my-post" element={<MyPost />} />
           </>
         )}
-        <Route path="/verification/:token" element={<Verification />} />
       </Routes>
     </div>
   );

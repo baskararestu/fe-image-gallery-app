@@ -3,8 +3,10 @@ import { useDispatch } from "react-redux";
 import { fetchUserById } from "../features/users/userSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState();
   const [previewUrl, setPreviewUrl] = useState("");
   const [formData, setFormData] = useState({
@@ -61,10 +63,21 @@ function Profile() {
     try {
       const token = localStorage.getItem("user_token");
       const data = new FormData();
-      data.append("fullname", formData.fullname);
-      data.append("username", formData.username);
-      data.append("bio", formData.bio);
-      data.append("image", formData.image);
+
+      if (formData.image) {
+        data.append("image", formData.image);
+      }
+      // Check if each field is defined before appending it to the FormData object
+      if (formData.fullname !== undefined) {
+        data.append("fullname", formData.fullname);
+      }
+      if (formData.username !== undefined) {
+        data.append("username", formData.username);
+      }
+      if (formData.bio !== undefined) {
+        data.append("bio", formData.bio);
+      }
+
       const response = await axios.post(
         "http://localhost:8000/auth/edit-user",
         data,
@@ -74,14 +87,29 @@ function Profile() {
           },
         }
       );
-      console.log(response.data);
+      console.log(response);
       setUser(response.data);
-      toast.success("User details updated successfully.");
+      if (response.data.message) {
+        sessionStorage.setItem(
+          "toastMessage",
+          "User details updated successfully."
+        );
+        window.location.reload();
+      }
     } catch (error) {
       console.error(error);
       toast.error(error);
     }
   };
+
+  useEffect(() => {
+    const toastMessage = sessionStorage.getItem("toastMessage");
+
+    if (toastMessage) {
+      toast.success(toastMessage);
+      sessionStorage.removeItem("toastMessage");
+    }
+  }, []);
 
   useEffect(() => {
     fetchUser();
@@ -115,7 +143,7 @@ function Profile() {
               <figure>
                 <img
                   src={previewUrl || `http://localhost:8000${formData?.image}`}
-                  // alt="Profile"
+                  alt="Profile"
                   className="w-1/2 h-1/2 object-cover"
                 />
               </figure>

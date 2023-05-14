@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,9 +25,21 @@ function Register() {
       .required("Confirm password cannot be empty"),
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const registerUser = async (value) => {
-    let response = await axios.post("http://localhost:8000/auth", value);
-    console.log(response);
+    try {
+      setIsLoading(true); // set isLoading to true before making the API call
+      let response = await axios.post("http://localhost:8000/auth", value);
+      console.log(response);
+      // navigate("/login");
+      toast.success("Register success");
+    } catch (error) {
+      toast.error("Invalid");
+      console.log(error);
+    } finally {
+      setIsLoading(false); // set isLoading to false after receiving the response
+    }
   };
 
   return (
@@ -42,8 +54,6 @@ function Register() {
         validationSchema={RegisterSchema}
         onSubmit={async (value) => {
           await registerUser(value);
-          // toast("Register success");
-          navigate("/login");
         }}
       >
         {(props) => {
@@ -204,9 +214,13 @@ function Register() {
                   transition
                   duration-150
                   ease-in
+                  disabled:btn-disabled
                 "
+                        disabled={isLoading} // disable the button if isSubmitting or isLoading is true
                       >
-                        <span className="mr-2 uppercase">Sign Up</span>
+                        <span className="mr-2 uppercase">
+                          {isLoading ? "Signing up..." : "Sign up"}
+                        </span>
                       </button>
                     </div>
                   </Form>

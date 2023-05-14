@@ -1,12 +1,32 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../features/users/userSlice";
 import { useDispatch } from "react-redux";
+import axios from "axios";
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userToken = localStorage.getItem("user_token");
+  const [user, setUser] = useState();
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/auth/get-user", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("user_token"),
+        },
+      });
+      setUser(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   const handleLogout = () => {
     // Perform logout action, such as clearing the user session
     console.log("Logged out");
@@ -17,7 +37,14 @@ function Navbar() {
   return (
     <div className="flex flex-row gap-5  navbar bg-primary">
       <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl">Image App</a>
+        <a
+          className="btn btn-ghost normal-case text-xl"
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          Image App
+        </a>
       </div>
 
       {userToken ? (
@@ -44,7 +71,7 @@ function Navbar() {
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">
                 <img
-                  src={``}
+                  src={`http://localhost:8000${user?.image}`}
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src =
