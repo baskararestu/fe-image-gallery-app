@@ -7,20 +7,18 @@ function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [comment, setComment] = useState("");
   const token = localStorage.getItem("user_token");
-  const [page, setPage] = useState(1);
-
-  const [lastContentRef, setLastContentRef] = useState(null);
-
-  const handleIntersection = (entries) => {
-    const entry = entries[0];
-    if (entry.isIntersecting && data.length % 6 === 0) {
-      setPage((prevPage) => prevPage + 1);
-    }
-  };
+  const [showComments, setShowComments] = useState(5); // number of comments to show
 
   const handleCommentChange = (event) => {
     setComment(event.target.value);
     console.log(comment);
+  };
+
+  const handleShowMoreComments = (contentId) => {
+    setShowComments((prevState) => ({
+      ...prevState,
+      [contentId]: (prevState[contentId] || 0) + 5, // show 5 more comments
+    }));
   };
 
   const handleAddComment = async (contentId) => {
@@ -49,7 +47,6 @@ function Home() {
       });
       setData(updatedData);
       setComment("");
-      console.log("Content fetched for page", page);
     } catch (error) {
       console.error(error);
     } finally {
@@ -58,22 +55,13 @@ function Home() {
     }
   };
 
-  console.log(data, "data");
-  useEffect(() => {
-    if (lastContentRef) {
-      const observer = new IntersectionObserver(handleIntersection, {
-        rootMargin: "0px 0px 100% 0px",
-      });
-      observer.observe(lastContentRef);
-      return () => observer.disconnect();
-    }
-  }, [lastContentRef]);
+  // console.log(data, "data");
 
   useEffect(() => {
-    const fetchData = async (page) => {
+    const fetchData = async () => {
       try {
         const contentsResponse = await axios.get(
-          `http://localhost:8000/content/all-content?page=${page}&limit=4`
+          `http://localhost:8000/content/all-content`
         );
         const contentsData = contentsResponse.data;
         const combinedData = await Promise.all(
@@ -97,22 +85,22 @@ function Home() {
           })
         );
 
-        setData((prevData) => [...prevData, ...combinedData]);
+        setData(combinedData);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchData(page);
-  }, [page]);
+    fetchData();
+  }, []);
+  console.log(data);
 
   return (
     <div className="pt-24 min-h-screen bg-gray-100 p-4">
       <div className={`grid grid-cols-${data.length} gap-4 justify-center`}>
         {data.map((content, index) => (
           <div
-            key={content.id_content}
-            ref={data.length === index + 1 ? setLastContentRef : null}
+            key={`${content.id_content}-${index}`}
             className=" bg-white shadow-lg rounded-lg overflow-hidden"
           >
             <Link
@@ -156,15 +144,28 @@ function Home() {
                 Comments ({content.comments.length}):
               </p>
               <ul className="mb-2">
-                {content.comments.map((comment) => (
-                  <li
-                    key={comment.id_comment}
-                    className="text-sm text-gray-700 mb-1"
-                  >
-                    <span className="font-medium">{comment.username}: </span>
-                    {comment.comment}
-                  </li>
-                ))}
+                <ul className="mb-2">
+                  {content.comments
+                    .slice(0, showComments[content.id_content] | 5)
+                    .map((comment) => (
+                      <li
+                        key={comment.id_comment}
+                        className="text-sm text-gray-700 mb-1"
+                      >
+                        <span className="font-medium">
+                          {comment.username}:{" "}
+                        </span>
+                        {comment.comment}
+                      </li>
+                    ))}
+                </ul>
+
+                <button
+                  className="btn-primary btn-sm text-slate-50 hover:bg-primary-hover"
+                  onClick={() => handleShowMoreComments(content.id_content)}
+                >
+                  Show more comments
+                </button>
               </ul>
 
               <form className="flex gap-2">
@@ -189,7 +190,6 @@ function Home() {
           </div>
         ))}
       </div>
-      <div ref={setLastContentRef}></div>
     </div>
   );
 }
