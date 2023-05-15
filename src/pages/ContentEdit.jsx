@@ -66,20 +66,20 @@ function ContentEdit() {
         {content && (
           <div
             key={content.id_content}
-            className="  bg-white shadow-lg rounded-lg overflow-hidden"
+            className="  card lg:card-side bg-base-100 shadow-xl w-3/4 h-3/4"
           >
             <img
-              className="w-full h-56 object-cover"
+              className="w-3/4 h-1/2 object-cover"
               src={`http://localhost:8000${content.image}`}
               alt=""
             />
-            <div className="p-4">
+            <div className="card-body p-4">
               <form onSubmit={handleFormSubmit}>
                 {" "}
                 {/* Add form submit handler */}
-                <h2 className="text-lg font-medium">
+                <h2 className="card-title ">
                   <input
-                    type="text"
+                    className="input rounded-lg input-primary"
                     value={newCaption}
                     onChange={handleCaptionChange}
                   />
@@ -95,8 +95,15 @@ function ContentEdit() {
                 </div>
                 <button type="submit" className="btn-primary btn">
                   Save
-                </button>{" "}
-                {/* Add a submit button */}
+                </button>
+                <button
+                  className="btn btn-outline bg-red-500"
+                  onClick={() => {
+                    navigate("/my-post");
+                  }}
+                >
+                  Cancel
+                </button>
               </form>
             </div>
           </div>
