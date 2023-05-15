@@ -40,10 +40,11 @@ function Home() {
   };
 
   const handleShowMoreComments = (contentId) => {
-    setShowComments((prevState) => ({
-      ...prevState,
-      [contentId]: (prevState[contentId] || 0) + 5, // show 5 more comments
-    }));
+    setShowComments((prevState) => {
+      const newState = { ...prevState };
+      newState[contentId] = (newState[contentId] || 0) + 5;
+      return newState;
+    });
   };
 
   const handleCommentChange = (event) => {
@@ -175,7 +176,7 @@ function Home() {
               Comments ( {item.comments.length} ):
             </h4>
             {item.comments
-              .slice(0, showComments[item.id_content] | 5)
+              .slice(0, showComments[item.id_content] || 5)
               .map((comment, index) => (
                 <ul key={index} className="flex flex-row gap-2">
                   <li>{comment.username} :</li>
