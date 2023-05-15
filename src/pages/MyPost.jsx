@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function MyPost() {
   const navigate = useNavigate();
@@ -25,13 +26,17 @@ function MyPost() {
 
   const deleteContent = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/content/del-contents/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.delete(
+        `http://localhost:8000/content/del-contents/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       // Remove the deleted content from the state
       setContent(content.filter((item) => item.id_content !== id));
+      toast.success(response.data.message);
     } catch (error) {
       console.error(error);
     }

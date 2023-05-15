@@ -110,6 +110,7 @@ function ContentDetails() {
       );
 
       setLikes(response.data.likesCount);
+      window.location.reload();
       toast.success(response.data.message);
     } catch (error) {
       toast.warn("you have been like this post");
