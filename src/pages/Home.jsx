@@ -13,6 +13,7 @@ function Home() {
   const [likes, setLikes] = useState(content?.likes || 0);
   const [loadMoreCounter, setLoadMoreCounter] = useState(0);
   const contentContainerRef = useRef(null);
+  const fetchContentTimerRef = useRef(null);
   const token = localStorage.getItem("user_token");
 
   const likeContent = async (contentId, userContentId) => {
@@ -93,33 +94,46 @@ function Home() {
       window.innerHeight + window.scrollY >=
         contentContainerRef.current.offsetHeight
     ) {
-      setCurrentPage((prevPage) => prevPage + 1);
-      setLoadMoreCounter((prevCounter) => prevCounter + 1);
+      clearTimeout(fetchContentTimerRef.current);
+      fetchContentTimerRef.current = setTimeout(() => {
+        setCurrentPage((prevPage) => prevPage + 1);
+        setLoadMoreCounter((prevCounter) => prevCounter + 1);
+      });
+      clearTimeout(fetchContentTimerRef.current);
+      fetchContentTimerRef.current = setTimeout(() => {
+        setCurrentPage((prevPage) => prevPage + 1);
+        setLoadMoreCounter((prevCounter) => prevCounter + 1);
+      }, 500); // Delay the fetchContent function by 500 milliseconds
+    }
+  };
+
+  const fetchContent = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/content/infinite-scroll?page=${currentPage}`
+      );
+      const { content: newContent, totalPages: newTotalPages } = response.data;
+
+      if (currentPage > 1) {
+        setContent((prevContent) => [...prevContent, ...newContent]);
+      } else {
+        setContent(newContent);
+      }
+
+      setTotalPages(newTotalPages);
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const fetchContent = async () => {
-      setIsLoading(true);
-
-      try {
-        const response = await axios.get(
-          `http://localhost:8000/content/infinite-scroll?page=${currentPage}`
-        );
-        const { content: newContent, totalPages: newTotalPages } =
-          response.data;
-
-        setContent((prevContent) => [...prevContent, ...newContent]);
-        setTotalPages(newTotalPages);
-        setIsLoading(false);
-        console.log(response, "response");
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchContent();
+    if (currentPage >= 1) {
+      fetchContent();
+    }
   }, [currentPage]);
 
   useEffect(() => {
@@ -130,6 +144,9 @@ function Home() {
   }, [isLoading]);
 
   const renderContent = () => {
+    if (content.length === 0) {
+      return <p className="text-gray-500">No content available.</p>;
+    }
     return content.map((item, index) => (
       <div
         key={`${item.id_content}-${index}`}
@@ -209,8 +226,6 @@ function Home() {
             </form>
           </div>
         )}
-
-        <p className="mt-4">Likes: {item.likes}</p>
       </div>
     ));
   };
@@ -221,8 +236,11 @@ function Home() {
       ref={contentContainerRef}
     >
       <div className="grid justify-center items-center w-full md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 p-4">
-        {renderContent()}
-        {isLoading && <p className="text-gray-500">Loading...</p>}
+        {isLoading && !content ? (
+          <p className="text-gray-500">Loading...</p>
+        ) : (
+          renderContent()
+        )}
       </div>
     </div>
   );
