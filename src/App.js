@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import Profile from "./pages/Profile";
 import MyPost from "./pages/MyPost";
 import ContentDetails from "./pages/ContentDetails";
+import ContentEdit from "./pages/ContentEdit";
 
 function App() {
   const userToken = localStorage.getItem("user_token");
@@ -53,6 +54,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-post" element={<MyPost />} />
+            <Route path="/edit/:id" element={<ContentEdit />} />
             <Route path="/content-details/:id" element={<ContentDetails />} />
           </>
         )}
