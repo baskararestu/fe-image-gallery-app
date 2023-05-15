@@ -1,23 +1,25 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function ContentDetails() {
+  const { id } = useParams();
   const [content, setContent] = useState(null);
   const [data, setData] = useState([]);
   const [comment, setComment] = useState([]);
-  const [likes, setLikes] = useState([]);
+  const [likes, setLikes] = useState(content?.likes || 0);
   const [showComments, setShowComments] = useState(5); // number of comments to show
-  const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [commentInput, setCommentInput] = useState("");
   const token = localStorage.getItem("user_token");
 
   const handleCommentChange = (event) => {
-    setComment(event.target.value);
-    console.log(comment);
+    setCommentInput(event.target.value);
+    console.log(commentInput);
   };
   const handleShowMoreComments = () => {
-    setShowComments((prevShowComments) => prevShowComments + 3); // show 5 more comments
+    setShowComments((prevShowComments) => prevShowComments + 5); // show 5 more comments
   };
 
   const handleAddComment = async (contentId) => {
@@ -25,9 +27,9 @@ function ContentDetails() {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/content/contents/${contentId}/comments&limit=5`,
+        `http://localhost:8000/content/contents/${contentId}/comments`,
         {
-          comment,
+          comment: commentInput,
         },
         {
           headers: {
@@ -45,7 +47,7 @@ function ContentDetails() {
         return content;
       });
       setData(updatedData);
-      setComment("");
+      setCommentInput("");
     } catch (error) {
       console.error(error);
     } finally {
@@ -65,13 +67,13 @@ function ContentDetails() {
         console.error(error);
       }
     };
-
     const fetchComments = async () => {
       try {
         const response = await axios.get(
           `http://localhost:8000/content/contents/${id}/show-comments`
         );
         setComment(response.data);
+        console.log(response, "comment fetch");
       } catch (error) {
         console.error(error);
       }
@@ -93,11 +95,30 @@ function ContentDetails() {
     fetchLikes();
   }, [id]);
 
-  console.log(comment);
-  console.log(content);
+  const likeContent = async (contentId, userContentId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/content/contents/${contentId}/like`,
+        {
+          id_user: userContentId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setLikes(response.data.likesCount);
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.warn("you have been like this post");
+    }
+  };
+  console.log(likes, "username");
   return (
     <div className={`pt-24 min-h-screen bg-gray-100 p-4 `}>
-      <div className={`grid grid-cols-1 gap-4 justify-center`}>
+      <div className={`flex gap-4 justify-center items-center`}>
         {content && (
           <div
             key={content.id_content}
@@ -109,7 +130,10 @@ function ContentDetails() {
               alt=""
             />
             <div className="p-4">
-              <button className="btn bg-primary-focus text-slate-50 gap-2">
+              <button
+                className="btn bg-primary-focus text-slate-50 gap-2"
+                onClick={() => likeContent(content.id_content, content.id_user)}
+              >
                 Likes
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -128,12 +152,15 @@ function ContentDetails() {
                 {likes}
               </button>
               <h2 className="text-lg font-medium">{content.caption}</h2>
-              <p className="text-sm text-gray-500 mb-2">
-                Owner: {content.username}
-              </p>
-              <p className="text-sm text-gray-500 mb-2">
-                Created at: {new Date(content.createAt).toLocaleDateString()}
-              </p>
+              <div className="text-sm text-gray-500 mb-2 flex gap-2">
+                Owner: <p className="font-semibold">{content.username}</p>
+              </div>
+              <div className="text-sm text-gray-500 mb-2 flex gap-2">
+                Created at:
+                <p className="font-semibold">
+                  {new Date(content.createAt).toLocaleDateString()}{" "}
+                </p>
+              </div>
 
               <ul className="mb-2">
                 {comment.slice(0, showComments).map((comment) => (
@@ -149,7 +176,7 @@ function ContentDetails() {
 
               <button
                 className="btn-primary btn-sm text-slate-50 hover:bg-primary-hover"
-                onClick={() => handleShowMoreComments(content.id_content)}
+                onClick={() => handleShowMoreComments(comment.id_content)}
               >
                 Show more comments
               </button>
@@ -167,7 +194,7 @@ function ContentDetails() {
                   onClick={() => {
                     handleAddComment(content.id_content); // pass contentId to handleAddComment function
                   }}
-                  disabled={isLoading || !comment} // disable button when loading or when commentText is empty
+                  disabled={isLoading || !commentInput} // disable button when loading or when commentText is empty
                 >
                   {isLoading ? "Commenting..." : "Comment"}
                 </button>

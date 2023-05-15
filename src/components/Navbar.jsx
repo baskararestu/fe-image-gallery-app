@@ -18,6 +18,7 @@ function Navbar() {
         },
       });
       setUser(response.data);
+      console.log(response.data, "navbar user");
     } catch (error) {
       console.error(error);
     }
@@ -33,7 +34,6 @@ function Navbar() {
   useEffect(() => {
     fetchUser();
   }, []);
-
   return (
     <div className="fixed top-0 flex flex-row gap-5  navbar bg-primary">
       <div className="flex-1">
@@ -81,6 +81,7 @@ function Navbar() {
                 />
               </div>
             </label>
+            <label></label>
             <ul
               tabIndex={0}
               className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-primary rounded-box w-52"
@@ -103,6 +104,7 @@ function Navbar() {
               </li>
             </ul>
           </div>
+          <span className=" text-black">{user?.username}</span>
         </div>
       ) : (
         <div>

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Home() {
   const [content, setContent] = useState([]);
@@ -9,9 +10,34 @@ function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [likes, setLikes] = useState(content?.likes || 0);
   const [loadMoreCounter, setLoadMoreCounter] = useState(0);
   const contentContainerRef = useRef(null);
   const token = localStorage.getItem("user_token");
+
+  const likeContent = async (contentId, userContentId) => {
+    setIsLoading(false);
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/content/contents/${contentId}/like`,
+        {
+          id_user: userContentId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setLikes(response.data.likesCount);
+      toast.success(response.data.message);
+      window.location.reload();
+    } catch (error) {
+      toast.warn("you have been like this post");
+    }
+  };
 
   const handleShowMoreComments = (contentId) => {
     setShowComments((prevState) => ({
@@ -120,6 +146,27 @@ function Home() {
             />
           </Link>
         </div>
+        <button
+          className="btn bg-primary-focus text-slate-50 gap-2"
+          onClick={() => likeContent(item.id_content, item.id_user)}
+        >
+          Likes
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+          {item.likes}
+        </button>
         <div className="text-lg font-semibold">{item.caption}</div>
 
         {item.comments && (
@@ -166,7 +213,7 @@ function Home() {
       </div>
     ));
   };
-  console.log(content);
+  console.log(content, "content");
   return (
     <div
       className="pt-16 flex justify-center items-center min-h-screen bg-gray-100"
@@ -180,31 +227,3 @@ function Home() {
   );
 }
 export default Home;
-//   <button
-//     className="btn-primary btn-sm text-slate-50 hover:bg-primary-hover"
-//     onClick={() => handleShowMoreComments(content.id_content)}
-//   >
-//     Show more comments
-//   </button>
-// </ul>
-
-{
-  /* <form className="flex gap-2">
-  <input
-    type="text"
-    placeholder="Add a comment"
-    className="border-gray-300 rounded-md flex-1 p-2"
-    onChange={handleCommentChange}
-  />
-  <button
-    type="submit"
-    className="btn bg-primary-focus text-slate-50 hover:bg-primary-hover"
-    onClick={() => {
-      handleAddComment(content.id_content); // pass contentId to handleAddComment function
-    }}
-    disabled={isLoading || !comment} // disable button when loading or when commentText is empty
-  >
-    {isLoading ? "Commenting..." : "Comment"}
-  </button>
-</form> */
-}

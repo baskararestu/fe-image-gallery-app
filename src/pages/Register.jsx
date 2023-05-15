@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 function Register() {
   const navigate = useNavigate();
@@ -32,7 +31,7 @@ function Register() {
       setIsLoading(true); // set isLoading to true before making the API call
       let response = await axios.post("http://localhost:8000/auth", value);
       console.log(response);
-      // navigate("/login");
+      navigate("/login");
       toast.success("Register success");
     } catch (error) {
       toast.error("Invalid");
