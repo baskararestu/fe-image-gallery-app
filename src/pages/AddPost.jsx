@@ -40,7 +40,7 @@ function AddPost() {
 
   return (
     <div className="pt-12 flex justify-center items-center h-screen">
-      <div className="p-5 card  bg-base-200 shadow-xl w-3/4 h-3/4  items-center">
+      <div className="p-5 card  bg-base-200 shadow-xl w-1/2 h-3/4  items-center">
         <h1 className="text-3xl font-bold mb-4">Add Post</h1>
         {imagePreview && (
           <img
