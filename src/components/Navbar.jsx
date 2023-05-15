@@ -67,6 +67,15 @@ function Navbar() {
               My Post
             </button>
           </div>
+          <div className="btn btn-ghost">
+            <button
+              onClick={() => {
+                navigate("/add-post");
+              }}
+            >
+              Add Post
+            </button>
+          </div>
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">

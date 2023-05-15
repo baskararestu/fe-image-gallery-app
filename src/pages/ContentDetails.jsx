@@ -1,8 +1,7 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 function ContentDetails() {
   const { id } = useParams();

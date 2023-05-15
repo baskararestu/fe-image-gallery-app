@@ -5,11 +5,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
 import { useEffect } from "react";
-import { ToastContainer } from "react-toastify";
 import Profile from "./pages/Profile";
 import MyPost from "./pages/MyPost";
 import ContentDetails from "./pages/ContentDetails";
 import ContentEdit from "./pages/ContentEdit";
+import AddPost from "./pages/AddPost";
 
 function App() {
   const userToken = localStorage.getItem("user_token");
@@ -40,7 +40,6 @@ function App() {
 
   return (
     <div data-theme="cupcake">
-      <ToastContainer autoClose={2000} />
       <Navbar />
       <Routes>
         <Route path="/verification/:token" element={<Verification />} />
@@ -53,6 +52,7 @@ function App() {
           <>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/add-post" element={<AddPost />} />
             <Route path="/my-post" element={<MyPost />} />
             <Route path="/edit/:id" element={<ContentEdit />} />
             <Route path="/content-details/:id" element={<ContentDetails />} />
