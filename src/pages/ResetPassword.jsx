@@ -1,18 +1,22 @@
-import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 function ResetPassword() {
+  // State variables
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [token, setToken] = useState("");
+
+  // Extract token from the URL when the component mounts
   useEffect(() => {
     const url = window.location.href;
     const tokenFromUrl = url.substring(url.lastIndexOf("/") + 1);
     setToken(tokenFromUrl);
   }, []);
 
+  // Function to handle password reset
   const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
@@ -24,7 +28,7 @@ function ResetPassword() {
         "http://localhost:8000/auth/reset-password",
         {
           newPassword,
-          confirmNewPassword: confirmPassword,
+          confirmPassword,
         },
         {
           headers: {
@@ -32,13 +36,11 @@ function ResetPassword() {
           },
         }
       );
-      console.log(token, "resetpassword");
       setSuccess(true);
     } catch (error) {
       setError(error.response.data.message);
     }
   };
-  console.log(token);
 
   return (
     <div className="bg-red-500 h-screen pt-24">
