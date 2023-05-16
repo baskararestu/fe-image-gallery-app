@@ -17,14 +17,19 @@ function ContentDetails() {
   const token = localStorage.getItem("user_token");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const { isVerified } = useSelector((state) => state.user);
 
   const handleCommentChange = (event) => {
     setCommentInput(event.target.value);
     console.log(commentInput);
   };
-  const handleShowMoreComments = () => {
-    setShowComments((prevShowComments) => prevShowComments + 5); // show 5 more comments
+  const handleShowMoreComments = (contentId) => {
+    setShowComments((prevState) => {
+      const newState = { ...prevState };
+      newState[contentId] = (newState[contentId] || 0) + 5;
+      return newState;
+    });
   };
 
   const handleAddComment = async (contentId) => {
@@ -77,7 +82,10 @@ function ContentDetails() {
         const response = await axios.get(
           `http://localhost:8000/content/contents/${id}/show-comments`
         );
-        setComment(response.data);
+        const sortedComments = response.data.sort((a, b) => {
+          return new Date(b.createAt) - new Date(a.createAt);
+        });
+        setComment(sortedComments);
         console.log(response, "comment fetch");
       } catch (error) {
         console.error(error);
