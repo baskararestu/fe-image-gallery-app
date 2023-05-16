@@ -57,37 +57,34 @@ function Navbar() {
 
       {userToken ? (
         <div className="flex-none gap-2">
-          {isVerified ? ( // Check if the user is verified
-            <>
-              <div className="btn btn-ghost">
-                <button
-                  onClick={() => {
-                    navigate("/");
-                  }}
-                >
-                  Home
-                </button>
-              </div>
-              <div className="btn btn-ghost">
-                <button
-                  onClick={() => {
-                    navigate("/my-post");
-                  }}
-                >
-                  My Post
-                </button>
-              </div>
-              <div className="btn btn-ghost">
-                <button
-                  onClick={() => {
-                    navigate("/add-post");
-                  }}
-                >
-                  Add Post
-                </button>
-              </div>
-            </>
-          ) : null}
+          <div className="btn btn-ghost">
+            <button
+              onClick={() => {
+                navigate("/");
+              }}
+            >
+              Home
+            </button>
+          </div>
+          <div className="btn btn-ghost">
+            <button
+              onClick={() => {
+                navigate("/my-post");
+              }}
+            >
+              My Post
+            </button>
+          </div>
+          <div className="btn btn-ghost">
+            <button
+              onClick={() => {
+                navigate("/add-post");
+              }}
+            >
+              Add Post
+            </button>
+          </div>
+
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">

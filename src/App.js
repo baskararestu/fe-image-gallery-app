@@ -11,6 +11,7 @@ import ContentDetails from "./pages/ContentDetails";
 import ContentEdit from "./pages/ContentEdit";
 import AddPost from "./pages/AddPost";
 import ForgetPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const userToken = localStorage.getItem("user_token");
@@ -25,6 +26,7 @@ function App() {
       location.pathname !== "/login" &&
       location.pathname !== "/register" &&
       location.pathname !== "/forget-password" &&
+      !location.pathname.startsWith("/reset-password/") &&
       !location.pathname.startsWith("/verification/")
     ) {
       window.location.replace("/login");
@@ -50,6 +52,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forget-password" element={<ForgetPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </>
         ) : (
           <>

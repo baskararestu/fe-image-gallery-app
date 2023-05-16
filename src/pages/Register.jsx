@@ -16,9 +16,12 @@ function Register() {
       .required("Email cannot be empty")
       .email("Wrong email format"),
     password: Yup.string()
+      .min(8)
       .required("Password cannot be empty")
-      .min(6, "Password too short")
-      .max(30, "Password too long"),
+      .matches(
+        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()])[A-Za-z\d!@#$%^&*()]{8,}$/,
+        "Passwords should contain at least 8 characters including an uppercase letter, a symbol, and a number"
+      ),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords must match")
       .required("Confirm password cannot be empty"),
@@ -34,7 +37,9 @@ function Register() {
       navigate("/login");
       toast.success("Register success");
     } catch (error) {
-      toast.error("Invalid");
+      toast.error("Registration failed. Username or Email already exist", {
+        autoClose: 3000,
+      });
       console.log(error);
     } finally {
       setIsLoading(false); // set isLoading to false after receiving the response
@@ -202,17 +207,8 @@ function Register() {
                   mt-2
                   items-center
                   justify-center
-                  focus:outline-none
-                  text-white text-sm
-                  sm:text-base
-                  bg-blue-500
-                  hover:bg-blue-600
-                  rounded-2xl
-                  py-2
+                  btn btn-primary rounded-md
                   w-full
-                  transition
-                  duration-150
-                  ease-in
                   disabled:btn-disabled
                 "
                         disabled={isLoading} // disable the button if isSubmitting or isLoading is true
@@ -241,7 +237,7 @@ function Register() {
                     Already have an account?
                     <a
                       href="/login"
-                      className="text-xs ml-2 text-blue-500 font-semibold hover:underline"
+                      className="text-xs ml-2 text-primary font-semibold hover:underline"
                     >
                       Sign In
                     </a>

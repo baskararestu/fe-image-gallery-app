@@ -172,7 +172,7 @@ function Login() {
                     You don't have an account?
                     <a
                       href="/register"
-                      className="text-xs ml-2 text-blue-500 font-semibold hover:underline"
+                      className="text-xs ml-2 text-primary font-semibold hover:underline"
                     >
                       Register now
                     </a>
