@@ -1,12 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Verification() {
   let { token } = useParams();
   let navigate = useNavigate();
+  const [verificationStatus, setVerificationStatus] = useState("");
 
   const tokenVerification = async () => {
     try {
@@ -23,20 +24,28 @@ function Verification() {
         console.log(token);
         if (response.data.success) {
           toast.success(response.data.message);
+          setVerificationStatus("success");
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      toast.error("Your verification is expired");
+      setVerificationStatus("expired");
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     tokenVerification();
     setTimeout(() => {
-      navigate("/login");
+      navigate("/");
     }, 8000);
   }, []);
   return (
-    <div>
-      <p>Your account is being verified</p>
+    <div className="pt-24 h-screen">
+      {verificationStatus === "success" && <p>Your account is verified now</p>}
+      {verificationStatus === "expired" && (
+        <p>Your verification link has expired</p>
+      )}
       <p>{token}</p>
     </div>
   );

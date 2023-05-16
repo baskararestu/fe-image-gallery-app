@@ -25,7 +25,13 @@ function Login() {
       setIsLoading(true);
       await dispatch(loginUser(value));
       // Navigate to the home page after a successful login
-      navigate("/");
+      await Promise.all([
+        navigate("/"),
+        window.location.reload(),
+        setTimeout(() => {
+          toast.success("Login successful");
+        }, 2000),
+      ]);
     } catch (error) {
       console.log(error);
       toast.error(error.response.data.message);
@@ -123,7 +129,7 @@ function Login() {
                       </div>
                       <div className="mt-5 flex flex-row justify-end">
                         <a
-                          href="/user/forget-password"
+                          href="/forget-password"
                           className="text-xs ml-2 text-blue-500 font-semibold hover:underline "
                         >
                           Forget Password?
@@ -139,18 +145,9 @@ function Login() {
                   mt-2
                   items-center
                   justify-center
-                  focus:outline-none
-                  text-white text-sm
-                  sm:text-base
-                  bg-blue-500
-                  hover:bg-blue-600
-                  rounded-2xl
-                  py-2
                   w-full
-                  transition
-                  duration-150
-                  ease-in
-                   disabled:btn-disabled
+                  btn btn-primary rounded-md
+                  disabled:btn-disabled
                 "
                         disabled={isLoading}
                       >

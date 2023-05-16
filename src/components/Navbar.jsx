@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../features/users/userSlice";
 import { useDispatch } from "react-redux";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userToken = localStorage.getItem("user_token");
   const [user, setUser] = useState();
+  const [isVerified, setIsVerified] = useState(null);
 
   const fetchUser = async () => {
     try {
@@ -18,17 +20,25 @@ function Navbar() {
         },
       });
       setUser(response.data);
-      console.log(response.data, "navbar user");
+      const verifiedUser = response.data.isVerified;
+      setIsVerified(verifiedUser);
+      console.log(isVerified, "navbar");
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Perform logout action, such as clearing the user session
     console.log("Logged out");
     dispatch(logoutUser());
-    navigate("/login");
+    await Promise.all([
+      navigate("/login"),
+      window.location.reload(),
+      setTimeout(() => {
+        toast.error("im logout");
+      }, 2000),
+    ]);
   };
 
   useEffect(() => {
@@ -49,33 +59,37 @@ function Navbar() {
 
       {userToken ? (
         <div className="flex-none gap-2">
-          <div className="btn btn-ghost">
-            <button
-              onClick={() => {
-                navigate("/");
-              }}
-            >
-              Home
-            </button>
-          </div>
-          <div className="btn btn-ghost">
-            <button
-              onClick={() => {
-                navigate("/my-post");
-              }}
-            >
-              My Post
-            </button>
-          </div>
-          <div className="btn btn-ghost">
-            <button
-              onClick={() => {
-                navigate("/add-post");
-              }}
-            >
-              Add Post
-            </button>
-          </div>
+          {isVerified ? ( // Check if the user is verified
+            <>
+              <div className="btn btn-ghost">
+                <button
+                  onClick={() => {
+                    navigate("/");
+                  }}
+                >
+                  Home
+                </button>
+              </div>
+              <div className="btn btn-ghost">
+                <button
+                  onClick={() => {
+                    navigate("/my-post");
+                  }}
+                >
+                  My Post
+                </button>
+              </div>
+              <div className="btn btn-ghost">
+                <button
+                  onClick={() => {
+                    navigate("/add-post");
+                  }}
+                >
+                  Add Post
+                </button>
+              </div>
+            </>
+          ) : null}
           <div className="dropdown dropdown-end">
             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
               <div className="w-10 rounded-full">
@@ -90,7 +104,6 @@ function Navbar() {
                 />
               </div>
             </label>
-            <label></label>
             <ul
               tabIndex={0}
               className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-primary rounded-box w-52"

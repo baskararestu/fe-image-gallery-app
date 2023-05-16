@@ -1,11 +1,19 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 function AddPost() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const token = localStorage.getItem("user_token");
+  const navigate = useNavigate();
+  const isVerified = useSelector((state) => state.user.isVerified);
+
+  if (!isVerified) {
+    navigate("/profile");
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -7,6 +8,11 @@ function MyPost() {
   const navigate = useNavigate();
   const [content, setContent] = useState([]);
   const token = localStorage.getItem("user_token");
+  const isVerified = useSelector((state) => state.user.isVerified);
+
+  if (!isVerified) {
+    navigate("/profile");
+  }
 
   const contentByIdUser = async () => {
     try {

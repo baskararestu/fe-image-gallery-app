@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 function Home() {
@@ -10,11 +10,13 @@ function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerified, setIsVerified] = useState(null);
   const [likes, setLikes] = useState(content?.likes || 0);
   const [loadMoreCounter, setLoadMoreCounter] = useState(0);
   const contentContainerRef = useRef(null);
   const fetchContentTimerRef = useRef(null);
   const token = localStorage.getItem("user_token");
+  const navigate = useNavigate();
 
   const likeContent = async (contentId, userContentId) => {
     setIsLoading(false);
@@ -129,6 +131,28 @@ function Home() {
       setIsLoading(false);
     }
   };
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/auth/get-user", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("user_token"),
+        },
+      });
+      const verifiedUser = response.data.isVerified;
+      setIsVerified(verifiedUser); // Set isVerified to the value received from the API
+
+      if (verifiedUser === 0) {
+        await navigate("/profile");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     if (currentPage >= 1) {

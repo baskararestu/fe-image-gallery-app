@@ -5,13 +5,8 @@ import { toast } from "react-toastify";
 export const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: {
-      id: "",
-      email: "",
-      username: "",
-      fullname: "",
-      bio: "",
-    },
+    user: null,
+    isVerified: null, // Add the isVerified property to track the user's verification status
   },
   reducers: {
     setUser: (state, action) => {
@@ -37,12 +32,10 @@ export function loginUser(data) {
     console.log("slice", data);
     let response = await axios.post("http://localhost:8000/auth/login", data);
     if (response.data.success) {
-      toast.success(response.data.message);
-      dispatch(setUser(response.data.data));
-      // localStorage.setItem("userLogin", JSON.stringify(response.data.data)); // store user data in local storage
+      setUser(response.data.data);
+      console.log(response.data.messsage);
       localStorage.setItem("user_token", response.data.token); // store the token in local storage
-
-      console.log(response.data.data);
+      console.log(response.data, "login");
     } else {
       alert(response.data.message);
     }
@@ -70,26 +63,5 @@ export function logoutUser() {
     dispatch(resetUser());
     localStorage.removeItem("user_token");
     // localStorage.removeItem("userLogin");
-    toast.error("im logout");
   };
 }
-
-// export function fetchUserById() {
-//   return async (dispatch) => {
-//     try {
-//       const token = localStorage.getItem("user_token");
-//       const response = await axios.get(`http://localhost:8000/auth/get-user`, {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       });
-//       dispatch(setUser(response.data)); // dispatch setProduct action with fetched product
-
-//       // dispatch(setUser(response.data)); // dispatch setUser action with fetched user
-//       console.log(response);
-//     } catch (error) {
-//       console.error(error);
-//       alert("An error occurred. Please try again later.");
-//     }
-// };
-// }

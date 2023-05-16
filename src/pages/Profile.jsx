@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { fetchUserById } from "../features/users/userSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 
 function Profile() {
-  const navigate = useNavigate();
   const [user, setUser] = useState();
   const [previewUrl, setPreviewUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [counter, setCounter] = useState(60); // Initial counter value (in seconds)
+  const [isCounterActive, setIsCounterActive] = useState(false); // Flag to indicate if the counter is active
   const [formData, setFormData] = useState({
     fullname: "",
     username: "",
@@ -16,6 +15,7 @@ function Profile() {
     file: null,
   });
   const [isFormValid, setIsFormValid] = useState(false);
+  const [isVerified, setIsVerified] = useState(null);
 
   const fetchUser = async () => {
     try {
@@ -25,6 +25,8 @@ function Profile() {
         },
       });
       setUser(response.data);
+      const verifiedUser = response.data.isVerified;
+      setIsVerified(verifiedUser);
       setFormData({
         fullname: response.data.fullname,
         username: response.data.username,
@@ -34,6 +36,30 @@ function Profile() {
       setIsFormValid(true);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const sendVerification = async () => {
+    try {
+      setIsLoading(true);
+      setIsCounterActive(true); // Start the counter
+      const response = await axios.post(
+        "http://localhost:8000/auth/resend-verification",
+        { email: user.email }
+      );
+      await toast.success(response.data.message, { autoClose: 3000 }); // Success toast with a custom auto close of 3000 milliseconds
+      toast.info("Your verification email will be expired in 10minute", {
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to send verification email.");
+    } finally {
+      setIsLoading(false); // Set isLoading to false regardless of success or error
     }
   };
 
@@ -103,16 +129,33 @@ function Profile() {
   };
 
   useEffect(() => {
+    let interval;
+
+    if (isCounterActive) {
+      interval = setInterval(() => {
+        setCounter((prevCounter) => prevCounter - 1);
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isCounterActive]);
+
+  useEffect(() => {
+    if (counter === 0) {
+      setIsCounterActive(false);
+      setCounter(60); // Reset the counter to its initial value
+    }
+  }, [counter]);
+
+  useEffect(() => {
     const toastMessage = sessionStorage.getItem("toastMessage");
 
     if (toastMessage) {
       toast.success(toastMessage);
       sessionStorage.removeItem("toastMessage");
     }
-  }, []);
-
-  useEffect(() => {
-    fetchUser();
   }, []);
 
   useEffect(() => {
@@ -128,7 +171,7 @@ function Profile() {
     }
   }, [user]);
 
-  console.log(user);
+  console.log(user, "user di profile");
   console.log(formData);
 
   return (
@@ -144,7 +187,7 @@ function Profile() {
                 <img
                   src={previewUrl || `http://localhost:8000${formData?.image}`}
                   alt="Profile"
-                  className="w-1/2 h-1/2 object-cover"
+                  className="w-3/4 h-1/2 object-cover"
                 />
               </figure>
               <div className="card-body">
@@ -208,15 +251,37 @@ function Profile() {
               </div>
             </div>
           </div>
-          <div className="mt-5">
-            <button
-              className="btn btn-primary"
-              onClick={handleSubmit}
-              disabled={!isFormValid}
-            >
-              Save
-            </button>
-          </div>
+
+          {!isVerified ? (
+            <div className="flex flex-col self-end place-items-end">
+              <div className="mt-5">
+                <button className="btn btn-primary" disabled>
+                  Save
+                </button>
+              </div>
+              <div className="mt-5">
+                <button
+                  className="btn btn-primary"
+                  disabled={isLoading || isCounterActive}
+                  onClick={sendVerification}
+                >
+                  {isCounterActive
+                    ? `Resend in ${counter}s`
+                    : "Send verification"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-5">
+              <button
+                className="btn btn-primary"
+                onClick={handleSubmit}
+                disabled={!isFormValid}
+              >
+                Save
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
