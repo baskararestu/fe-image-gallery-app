@@ -44,6 +44,15 @@ function ContentItem({
         {item.likes}
       </button>
       <div className="text-lg font-semibold">{item.caption}</div>
+      <div className="text-sm text-gray-500 mb-2 flex gap-2">
+        Owner: <p className="font-semibold">{item.username}</p>
+      </div>
+      <div className="text-sm text-gray-500 mb-2 flex gap-2">
+        Created at:
+        <p className="font-semibold">
+          {new Date(item.createAt).toLocaleDateString()}{" "}
+        </p>
+      </div>
       {item.comments && (
         <div className="mt-4">
           <h4 className="text-sm font-semibold">
