@@ -2,13 +2,18 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { fetchUser } from "../features/users/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 function ContentEdit() {
   const [content, setContent] = useState([]);
   const [newCaption, setNewCaption] = useState(""); // State for storing the new caption
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const token = localStorage.getItem("user_token");
+  const { user, isVerified } = useSelector((state) => state.user);
+
   const fetchContent = async () => {
     try {
       const response = await axios.get(
@@ -59,6 +64,34 @@ function ContentEdit() {
   useEffect(() => {
     fetchContent();
   }, [id]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchUser());
+        if (isVerified === 0) {
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, navigate, isVerified]);
+
+  // Check if the user is the owner of the content
+  if (user && content && user.id_user !== content.id_user) {
+    navigate("/");
+
+    return (
+      <div className="pt-16 flex justify-center items-center min-h-screen bg-gray-100">
+        You are not authorized to edit this content.
+      </div>
+    );
+  }
+
+  console.log(user);
 
   return (
     <div className={`pt-24 min-h-screen bg-gray-100 p-4 `}>

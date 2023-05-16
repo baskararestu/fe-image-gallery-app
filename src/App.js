@@ -15,32 +15,30 @@ import ForgetPassword from "./pages/ForgetPassword";
 function App() {
   const userToken = localStorage.getItem("user_token");
 
-  // const location = useLocation();
+  const location = useLocation();
 
-  // useEffect(() => {
-  //   // Redirect to the login page if the user token is not present
-  //   // and the current page is not the login or register page
-  //   if (
-  //     !userToken &&
-  //     location.pathname !== "/login" &&
-  //     location.pathname !== "/register" &&
-  //     location.pathname !== "/forget-password" &&
-  //     !location.pathname.startsWith("/verification/")
-  //   ) {
-  //     window.location.replace("/login");
-  //   }
+  useEffect(() => {
+    // Redirect to the login page if the user token is not present
+    // and the current page is not the login or register page
+    if (
+      !userToken &&
+      location.pathname !== "/login" &&
+      location.pathname !== "/register" &&
+      location.pathname !== "/forget-password" &&
+      !location.pathname.startsWith("/verification/")
+    ) {
+      window.location.replace("/login");
+    }
 
-  //   // Redirect to the home page if the user token is present
-  //   // and the current page is the login or register page
-  //   if (
-  //     userToken &&
-  //     (location.pathname === "/login" ||
-  //       location.pathname === "/register" ||
-  //       location.pathname !== "/forget-password")
-  //   ) {
-  //     window.location.replace("/");
-  //   }
-  // }, [userToken, location.pathname]);
+    // Redirect to the home page if the user token is present
+    // and the current page is the login or register page
+    if (
+      userToken &&
+      (location.pathname === "/login" || location.pathname === "/register")
+    ) {
+      window.location.replace("/");
+    }
+  }, [userToken, location.pathname]);
 
   return (
     <div data-theme="cupcake">

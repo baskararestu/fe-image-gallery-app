@@ -1,7 +1,9 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { fetchUser } from "../features/users/userSlice";
 
 function Home() {
   const [content, setContent] = useState([]);
@@ -10,13 +12,14 @@ function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [isVerified, setIsVerified] = useState(null);
   const [likes, setLikes] = useState(content?.likes || 0);
   const [loadMoreCounter, setLoadMoreCounter] = useState(0);
   const contentContainerRef = useRef(null);
   const fetchContentTimerRef = useRef(null);
   const token = localStorage.getItem("user_token");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isVerified = useSelector((state) => state.user.isVerified);
 
   const likeContent = async (contentId, userContentId) => {
     setIsLoading(false);
@@ -56,7 +59,7 @@ function Home() {
   };
 
   const handleAddComment = async (contentId) => {
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       const response = await axios.post(
@@ -83,10 +86,11 @@ function Home() {
       setComment("");
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsLoading(false);
-      window.location.reload();
     }
+    // finally {
+    //   setIsLoading(false);
+    //   // window.location.reload();
+    // }
   };
 
   const handleScroll = () => {
@@ -132,27 +136,20 @@ function Home() {
     }
   };
 
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get("http://localhost:8000/auth/get-user", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("user_token"),
-        },
-      });
-      const verifiedUser = response.data.isVerified;
-      setIsVerified(verifiedUser); // Set isVerified to the value received from the API
-
-      if (verifiedUser === 0) {
-        await navigate("/profile");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
-    fetchUser();
-  }, []);
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchUser());
+        if (isVerified === 0) {
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, navigate, isVerified]);
 
   useEffect(() => {
     if (currentPage >= 1) {

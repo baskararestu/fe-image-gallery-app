@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../features/users/userSlice";
-import { useDispatch } from "react-redux";
+import { logoutUser, setLoggedIn } from "../features/users/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -11,6 +11,7 @@ function Navbar() {
   const userToken = localStorage.getItem("user_token");
   const [user, setUser] = useState();
   const [isVerified, setIsVerified] = useState(null);
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
 
   const fetchUser = async () => {
     try {
@@ -29,21 +30,18 @@ function Navbar() {
   };
 
   const handleLogout = async () => {
-    // Perform logout action, such as clearing the user session
     console.log("Logged out");
     dispatch(logoutUser());
-    await Promise.all([
-      navigate("/login"),
-      window.location.reload(),
-      setTimeout(() => {
-        toast.error("im logout");
-      }, 2000),
-    ]);
+    dispatch(setLoggedIn(false)); // Set isLoggedIn to false after logout
+    navigate("/login");
+    toast.error("Log Out");
   };
 
   useEffect(() => {
-    fetchUser();
-  }, []);
+    if (isLoggedIn) {
+      fetchUser();
+    }
+  }, [isLoggedIn]);
   return (
     <div className="fixed top-0 flex flex-row gap-5  navbar bg-primary">
       <div className="flex-1">

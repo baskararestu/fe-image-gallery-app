@@ -1,19 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUser } from "../features/users/userSlice";
+
 function AddPost() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const token = localStorage.getItem("user_token");
+  const { isVerified } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const isVerified = useSelector((state) => state.user.isVerified);
-
-  if (!isVerified) {
-    navigate("/profile");
-  }
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +32,7 @@ function AddPost() {
           },
         }
       );
-
+      navigate("/");
       toast.success("Content added successfully");
 
       // Clear form fields and image preview
@@ -46,6 +45,28 @@ function AddPost() {
     }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchUser());
+        if (isVerified === 0) {
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, navigate, isVerified]);
+
+  if (isVerified === 0) {
+    return (
+      <div className="pt-16 flex justify-center items-center min-h-screen bg-gray-100">
+        <p className="text-gray-500">No content available.</p>
+      </div>
+    );
+  }
   return (
     <div className="pt-12 flex justify-center items-center h-screen">
       <div className="p-5 card  bg-base-200 shadow-xl w-1/2 h-3/4  items-center">

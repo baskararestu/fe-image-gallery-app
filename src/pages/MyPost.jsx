@@ -1,18 +1,16 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { fetchUser } from "../features/users/userSlice";
 
 function MyPost() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [content, setContent] = useState([]);
   const token = localStorage.getItem("user_token");
-  const isVerified = useSelector((state) => state.user.isVerified);
-
-  if (!isVerified) {
-    navigate("/profile");
-  }
+  const { isVerified } = useSelector((state) => state.user);
 
   const contentByIdUser = async () => {
     try {
@@ -49,10 +47,29 @@ function MyPost() {
   };
 
   useEffect(() => {
-    contentByIdUser();
-  }, []);
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchUser());
+        if (isVerified === 0) {
+          navigate("/profile");
+        } else {
+          contentByIdUser();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-  console.log(content, "mypost");
+    fetchData();
+  }, [dispatch, navigate, isVerified]);
+
+  if (isVerified === 0) {
+    return (
+      <div className="pt-16 flex justify-center items-center min-h-screen bg-gray-100">
+        <p className="text-gray-500">No content available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="py-20 px-10 grid gap-4 justify-center min-h-screen sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

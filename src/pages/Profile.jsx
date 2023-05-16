@@ -1,47 +1,18 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { fetchUser, updateUser } from "../features/users/userSlice";
 
 function Profile() {
-  const [user, setUser] = useState();
-  const [previewUrl, setPreviewUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [counter, setCounter] = useState(60); // Initial counter value (in seconds)
   const [isCounterActive, setIsCounterActive] = useState(false); // Flag to indicate if the counter is active
-  const [formData, setFormData] = useState({
-    fullname: "",
-    username: "",
-    bio: "",
-    file: null,
-  });
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [isVerified, setIsVerified] = useState(null);
-
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get("http://localhost:8000/auth/get-user", {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("user_token"),
-        },
-      });
-      setUser(response.data);
-      const verifiedUser = response.data.isVerified;
-      setIsVerified(verifiedUser);
-      setFormData({
-        fullname: response.data.fullname,
-        username: response.data.username,
-        bio: response.data.bio,
-        image: response.data.image,
-      });
-      setIsFormValid(true);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, isVerified } = useSelector((state) => state.user);
 
   const sendVerification = async () => {
     try {
@@ -66,22 +37,22 @@ function Profile() {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setFormData({
-        ...formData,
+      const updatedUser = {
+        ...user,
         image: file,
-      });
+      };
+      dispatch(updateUser(updatedUser));
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setFormData({
-      ...formData,
+    const updatedUser = {
+      ...user,
       [name]: value,
-    });
-
-    setIsFormValid(true);
+    };
+    dispatch(updateUser(updatedUser));
   };
 
   const handleSubmit = async (event) => {
@@ -90,18 +61,17 @@ function Profile() {
       const token = localStorage.getItem("user_token");
       const data = new FormData();
 
-      if (formData.image) {
-        data.append("image", formData.image);
+      if (user.image) {
+        data.append("image", user.image);
       }
-      // Check if each field is defined before appending it to the FormData object
-      if (formData.fullname !== undefined) {
-        data.append("fullname", formData.fullname);
+      if (user.fullname) {
+        data.append("fullname", user.fullname);
       }
-      if (formData.username !== undefined) {
-        data.append("username", formData.username);
+      if (user.username) {
+        data.append("username", user.username);
       }
-      if (formData.bio !== undefined) {
-        data.append("bio", formData.bio);
+      if (user.bio) {
+        data.append("bio", user.bio);
       }
 
       const response = await axios.post(
@@ -113,8 +83,9 @@ function Profile() {
           },
         }
       );
-      console.log(response);
-      setUser(response.data);
+
+      dispatch(updateUser(response.data)); // Dispatch the updateUser action with the updated user data
+
       if (response.data.message) {
         sessionStorage.setItem(
           "toastMessage",
@@ -127,6 +98,21 @@ function Profile() {
       toast.error(error);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchUser());
+        if (isVerified === 0) {
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, navigate, isVerified]);
 
   useEffect(() => {
     let interval;
@@ -158,21 +144,7 @@ function Profile() {
     }
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        fullname: user.fullname,
-        email: user.email,
-        username: user.username,
-        bio: user.bio,
-        image: user.image,
-      });
-      setIsFormValid(true);
-    }
-  }, [user]);
-
   console.log(user, "user di profile");
-  console.log(formData);
 
   return (
     <div className="pt-16 h-screen w-screen flex justify-center overflow-hidden">
@@ -185,7 +157,7 @@ function Profile() {
             <div className="card w-96 bg-base-100 shadow-xl">
               <figure>
                 <img
-                  src={previewUrl || `http://localhost:8000${formData?.image}`}
+                  src={previewUrl || `http://localhost:8000${user?.image}`}
                   alt="Profile"
                   className="w-3/4 h-1/2 object-cover"
                 />
@@ -213,7 +185,7 @@ function Profile() {
                   placeholder="Type here"
                   className="input input-bordered input-primary w-full max-w-xs"
                   name="fullname"
-                  value={formData.fullname}
+                  value={user?.fullname}
                   onChange={handleInputChange}
                 />
               </div>
@@ -224,7 +196,7 @@ function Profile() {
                   placeholder="Type here"
                   className="input input-bordered input-primary w-full max-w-xs"
                   name="username"
-                  value={formData.username}
+                  value={user?.username}
                   onChange={handleInputChange}
                 />
               </div>
@@ -235,7 +207,7 @@ function Profile() {
                   placeholder="Type here"
                   className="input input-bordered input-primary w-full max-w-xs"
                   name="email"
-                  value={formData.email}
+                  value={user?.email}
                   disabled
                 />
               </div>
@@ -245,7 +217,7 @@ function Profile() {
                   className="textarea textarea-primary resize-none"
                   placeholder="Bio"
                   name="bio"
-                  value={formData.bio}
+                  value={user?.bio}
                   onChange={handleInputChange}
                 ></textarea>
               </div>
@@ -276,7 +248,7 @@ function Profile() {
               <button
                 className="btn btn-primary"
                 onClick={handleSubmit}
-                disabled={!isFormValid}
+                disabled={isVerified === false}
               >
                 Save
               </button>

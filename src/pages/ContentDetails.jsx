@@ -1,7 +1,9 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { fetchUser } from "../features/users/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 function ContentDetails() {
   const { id } = useParams();
@@ -13,6 +15,9 @@ function ContentDetails() {
   const [isLoading, setIsLoading] = useState(false);
   const [commentInput, setCommentInput] = useState("");
   const token = localStorage.getItem("user_token");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isVerified } = useSelector((state) => state.user);
 
   const handleCommentChange = (event) => {
     setCommentInput(event.target.value);
@@ -116,6 +121,29 @@ function ContentDetails() {
       toast.warn("you have been like this post");
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await dispatch(fetchUser());
+        if (isVerified === 0) {
+          navigate("/profile");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, navigate, isVerified, id]);
+
+  if (isVerified === 0) {
+    return (
+      <div className="pt-16 flex justify-center items-center min-h-screen bg-gray-100">
+        <p className="text-gray-500">No content available.</p>
+      </div>
+    );
+  }
   console.log(likes, "username");
   return (
     <div className={`pt-24 min-h-screen bg-gray-100 p-4 `}>

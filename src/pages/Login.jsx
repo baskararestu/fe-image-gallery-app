@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { loginUser } from "../features/users/userSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { loginUser, setLoggedIn } from "../features/users/userSlice";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -18,20 +18,16 @@ function Login() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+
   const dispatch = useDispatch();
 
   const handleLoginUser = async (value) => {
     try {
       setIsLoading(true);
       await dispatch(loginUser(value));
-      // Navigate to the home page after a successful login
-      await Promise.all([
-        navigate("/"),
-        window.location.reload(),
-        setTimeout(() => {
-          toast.success("Login successful");
-        }, 2000),
-      ]);
+      await dispatch(setLoggedIn(true)); // Set isLoggedIn to true after successful login
+      navigate("/");
+      //  window.location.reload();
     } catch (error) {
       console.log(error);
       toast.error(error.response.data.message);
@@ -39,6 +35,7 @@ function Login() {
       setIsLoading(false); // set isLoading to false after receiving the response
     }
   };
+
   return (
     <div>
       <Formik
