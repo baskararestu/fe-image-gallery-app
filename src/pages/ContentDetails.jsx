@@ -24,12 +24,8 @@ function ContentDetails() {
     setCommentInput(event.target.value);
     console.log(commentInput);
   };
-  const handleShowMoreComments = (contentId) => {
-    setShowComments((prevState) => {
-      const newState = { ...prevState };
-      newState[contentId] = (newState[contentId] || 0) + 5;
-      return newState;
-    });
+  const handleShowMoreComments = () => {
+    setShowComments((prevShowComments) => prevShowComments + 5); // show 5 more comments
   };
 
   const handleAddComment = async (contentId) => {
@@ -83,7 +79,7 @@ function ContentDetails() {
           `http://localhost:8000/content/contents/${id}/show-comments`
         );
         const sortedComments = response.data.sort((a, b) => {
-          return new Date(b.createAt) - new Date(a.createAt);
+          return new Date(b.created_at) - new Date(a.created_at);
         });
         setComment(sortedComments);
         console.log(response, "comment fetch");
